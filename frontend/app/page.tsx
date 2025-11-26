@@ -8,7 +8,7 @@ import TrustChart from '@/components/TrustChart'
 import { useMinerStats } from '@/hooks/useMinerStats'
 
 export default function Home() {
-  const [selectedMiner, setSelectedMiner] = useState<string>('miner1')
+  const [selectedMiner, setSelectedMiner] = useState<string>('')
   const [dataLimit, setDataLimit] = useState<number>(120)
   const [incentiveLimit, setIncentiveLimit] = useState<number>(50)
   const [trustLimit, setTrustLimit] = useState<number>(50)
@@ -19,7 +19,7 @@ export default function Home() {
   const [endDateInput, setEndDateInput] = useState<string>('')
   const [endTimeInput, setEndTimeInput] = useState<string>('')
   const [refreshKey, setRefreshKey] = useState(0)
-  const { isLoading } = useMinerStats(selectedMiner)
+  const { isLoading } = useMinerStats(selectedMiner || '')
   
   const limitOptions = [48, 72, 96, 120, 144, 168, 192, 216, 240, 480, 720]
   const incentiveLimitOptions = [25, 50, 100, 200, 300, 500]
@@ -127,7 +127,11 @@ export default function Home() {
         />
 
         {/* Asset Charts */}
-        {isLoading ? (
+        {!selectedMiner ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            Please select a miner to view data
+          </div>
+        ) : isLoading ? (
           <div className="text-center py-8">Loading charts...</div>
         ) : (
           <div className="mt-6">
@@ -263,66 +267,70 @@ export default function Home() {
         )}
 
         {/* Incentive Chart */}
-        <div className="mt-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Incentive History
-            </h2>
-            <div className="flex items-center gap-2">
-              <label htmlFor="incentive-limit" className="text-sm text-gray-600 dark:text-gray-400">
-                Data Points:
-              </label>
-              <select
-                id="incentive-limit"
-                value={incentiveLimit}
-                onChange={(e) => setIncentiveLimit(Number(e.target.value))}
-                className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {incentiveLimitOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+        {selectedMiner && (
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Incentive History
+              </h2>
+              <div className="flex items-center gap-2">
+                <label htmlFor="incentive-limit" className="text-sm text-gray-600 dark:text-gray-400">
+                  Data Points:
+                </label>
+                <select
+                  id="incentive-limit"
+                  value={incentiveLimit}
+                  onChange={(e) => setIncentiveLimit(Number(e.target.value))}
+                  className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {incentiveLimitOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
+            <IncentiveChart 
+              key={`${selectedMiner}-incentive-${refreshKey}-${incentiveLimit}`}
+              minerName={selectedMiner} 
+              limit={incentiveLimit}
+            />
           </div>
-          <IncentiveChart 
-            key={`${selectedMiner}-incentive-${refreshKey}-${incentiveLimit}`}
-            minerName={selectedMiner} 
-            limit={incentiveLimit}
-          />
-        </div>
+        )}
 
         {/* Trust Chart */}
-        <div className="mt-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Trust History
-            </h2>
-            <div className="flex items-center gap-2">
-              <label htmlFor="trust-limit" className="text-sm text-gray-600 dark:text-gray-400">
-                Data Points:
-              </label>
-              <select
-                id="trust-limit"
-                value={trustLimit}
-                onChange={(e) => setTrustLimit(Number(e.target.value))}
-                className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {trustLimitOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+        {selectedMiner && (
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Trust History
+              </h2>
+              <div className="flex items-center gap-2">
+                <label htmlFor="trust-limit" className="text-sm text-gray-600 dark:text-gray-400">
+                  Data Points:
+                </label>
+                <select
+                  id="trust-limit"
+                  value={trustLimit}
+                  onChange={(e) => setTrustLimit(Number(e.target.value))}
+                  className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {trustLimitOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
+            <TrustChart 
+              key={`${selectedMiner}-trust-${refreshKey}-${trustLimit}`}
+              minerName={selectedMiner} 
+              limit={trustLimit}
+            />
           </div>
-          <TrustChart 
-            key={`${selectedMiner}-trust-${refreshKey}-${trustLimit}`}
-            minerName={selectedMiner} 
-            limit={trustLimit}
-          />
-        </div>
+        )}
       </div>
     </main>
   )

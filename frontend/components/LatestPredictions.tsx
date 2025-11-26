@@ -15,6 +15,13 @@ export default function LatestPredictions({ minerName }: LatestPredictionsProps)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Don't fetch if minerName is empty
+    if (!minerName) {
+      setIsLoading(false)
+      setPredictions([])
+      return
+    }
+
     const fetchPredictions = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/miners/${minerName}/predictions?limit=10`)

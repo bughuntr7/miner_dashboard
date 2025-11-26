@@ -25,6 +25,13 @@ export default function PredictionChart({ minerName }: PredictionChartProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Don't fetch if minerName is empty
+    if (!minerName) {
+      setIsLoading(false)
+      setData([])
+      return
+    }
+
     const fetchPredictions = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/miners/${minerName}/predictions?limit=50`)

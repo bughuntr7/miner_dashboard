@@ -184,11 +184,11 @@ def _read_miner_csv(miner_name: str) -> pd.DataFrame:
     
     try:
         df = pd.read_csv(csv_path)
-        # Parse timestamp columns
+        # Parse timestamp columns - handle ISO8601 format and mixed formats
         if 'timestamp' in df.columns:
-            df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+            df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='ISO8601', errors='coerce')
         if 'datetime' in df.columns:
-            df['datetime'] = pd.to_datetime(df['datetime'], utc=True)
+            df['datetime'] = pd.to_datetime(df['datetime'], utc=True, format='ISO8601', errors='coerce')
         return df
     except Exception as e:
         logger.error(f"Error reading CSV for {miner_name}: {e}")
@@ -198,17 +198,23 @@ def _read_miner_csv(miner_name: str) -> pd.DataFrame:
 @app.get("/api/miners")
 async def get_miners():
     """
-    Get list of all miners.
+    Get list of all miners that have data.
     Dynamically discovers miners from the file system on each request.
+    Only returns miners that have actual data in their CSV files.
     """
     # Dynamically discover miners from file system
     all_miners = Config.get_all_miners()
     
+    # Filter miners to only include those with actual data
+    miners_with_data = []
+    for name, display in sorted(all_miners.items()):
+        df = _read_miner_csv(name)
+        # Only include miners with non-empty data
+        if not df.empty and len(df) > 0:
+            miners_with_data.append({"name": name, "display_name": display})
+    
     return {
-        "miners": [
-            {"name": name, "display_name": display}
-            for name, display in sorted(all_miners.items())
-        ]
+        "miners": miners_with_data
     }
 
 
@@ -505,11 +511,11 @@ def _read_miner_incentive_csv(miner_name: str) -> pd.DataFrame:
     
     try:
         df = pd.read_csv(csv_path)
-        # Parse timestamp columns
+        # Parse timestamp columns - handle ISO8601 format and mixed formats
         if 'timestamp' in df.columns:
-            df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+            df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='ISO8601', errors='coerce')
         if 'datetime' in df.columns:
-            df['datetime'] = pd.to_datetime(df['datetime'], utc=True)
+            df['datetime'] = pd.to_datetime(df['datetime'], utc=True, format='ISO8601', errors='coerce')
         return df
     except Exception as e:
         logger.error(f"Error reading incentive CSV for {miner_name}: {e}")

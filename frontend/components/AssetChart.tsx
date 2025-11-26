@@ -88,6 +88,14 @@ export default function AssetChart({ minerName, assetName, assetDisplayName, col
   const { showAlert } = useAlerts()
 
   useEffect(() => {
+    // Don't fetch if minerName is empty
+    if (!minerName) {
+      setIsLoading(false)
+      setData([])
+      setMetrics(null)
+      return
+    }
+
     const fetchData = async () => {
       try {
         setIsLoading(true)

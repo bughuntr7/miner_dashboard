@@ -22,7 +22,13 @@ export default function MinerSelector({ selectedMiner, onSelectMiner }: MinerSel
     const fetchMiners = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/miners`)
-        setMiners(response.data.miners)
+        const fetchedMiners = response.data.miners
+        setMiners(fetchedMiners)
+        
+        // Auto-select first miner if no miner is selected
+        if (fetchedMiners.length > 0 && !selectedMiner) {
+          onSelectMiner(fetchedMiners[0].name)
+        }
       } catch (error) {
         console.error('Error fetching miners:', error)
       }
@@ -32,28 +38,46 @@ export default function MinerSelector({ selectedMiner, onSelectMiner }: MinerSel
     fetchMiners()
     
     // No auto-refresh - miners are discovered when component mounts or page refreshes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Handle case where selected miner is no longer in the list
+  useEffect(() => {
+    if (selectedMiner && miners.length > 0) {
+      const minerExists = miners.find(m => m.name === selectedMiner)
+      if (!minerExists) {
+        // Selected miner no longer exists, select first available
+        onSelectMiner(miners[0].name)
+      }
+    }
+  }, [miners, selectedMiner, onSelectMiner])
 
   return (
     <div className="mb-6">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         Select Miner
       </label>
-      <div className="flex gap-2">
-        {miners.map((miner) => (
-          <button
-            key={miner.name}
-            onClick={() => onSelectMiner(miner.name)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              selectedMiner === miner.name
-                ? 'bg-primary-600 text-white'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            {miner.display_name}
-          </button>
-        ))}
-      </div>
+      {miners.length === 0 ? (
+        <div className="text-gray-500 dark:text-gray-400">
+          No miners with data available. Please ensure CSV files exist with data.
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          {miners.map((miner) => (
+            <button
+              key={miner.name}
+              onClick={() => onSelectMiner(miner.name)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                selectedMiner === miner.name
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              {miner.display_name}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

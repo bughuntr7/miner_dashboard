@@ -14,6 +14,10 @@ class Config:
     # Points to precog_lstm/data/miner directory
     MINER_DATA_DIR: str = os.getenv("MINER_DATA_DIR", "../precog_lstm/data/miner")
     
+    # Real price CSV files path (relative to project root)
+    # Points to precog_lstm/data/real_price directory
+    REAL_PRICE_DIR: str = os.getenv("REAL_PRICE_DIR", "../precog_lstm/data/real_price")
+    
     # Dashboard Configuration
     DASHBOARD_HOST: str = os.getenv("DASHBOARD_HOST", "0.0.0.0")
     DASHBOARD_PORT: int = int(os.getenv("DASHBOARD_PORT", "8000"))
@@ -99,4 +103,10 @@ class Config:
         all_miners.update(discovered)
         
         return all_miners
+    
+    @classmethod
+    def get_real_price_dir(cls) -> Path:
+        """Get the real price CSV files directory path."""
+        project_root = Path(__file__).parent.parent
+        return project_root / cls.REAL_PRICE_DIR
 

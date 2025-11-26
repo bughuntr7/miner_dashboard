@@ -5,14 +5,19 @@ from pathlib import Path
 import pandas as pd
 import logging
 
+from backend.config import Config
+
 logger = logging.getLogger(__name__)
 
 
 class PriceCSVLoader:
     """Load actual prices from CSV files in the precog_lstm/data/real_price/ directory."""
     
-    # Path to real price CSV files (now in precog_lstm/data/real_price/)
-    REAL_PRICE_DIR = Path(__file__).parent.parent / "../precog_lstm/data/real_price"
+    # Path to real price CSV files (configurable via REAL_PRICE_DIR env var)
+    @classmethod
+    def get_real_price_dir(cls) -> Path:
+        """Get the real price directory path from config."""
+        return Config.get_real_price_dir()
     
     # Asset to CSV file mapping (using _7d.csv files)
     ASSET_CSV_MAP = {
@@ -43,12 +48,13 @@ class PriceCSVLoader:
             return None
         
         # Try primary filename first, then fallback
-        csv_file = cls.REAL_PRICE_DIR / cls.ASSET_CSV_MAP[asset.lower()]
+        real_price_dir = cls.get_real_price_dir()
+        csv_file = real_price_dir / cls.ASSET_CSV_MAP[asset.lower()]
         if not csv_file.exists():
             # Try fallback filename
             fallback_name = cls.ASSET_CSV_FALLBACK.get(asset.lower())
             if fallback_name:
-                csv_file = cls.REAL_PRICE_DIR / fallback_name
+                csv_file = real_price_dir / fallback_name
         
         # Check if file exists
         if not csv_file.exists():

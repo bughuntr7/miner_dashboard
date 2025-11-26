@@ -21,11 +21,11 @@ class CSVParser:
             from io import StringIO
             df = pd.read_csv(StringIO(csv_content))
             
-            # Parse timestamp column
+            # Parse timestamp column - handle ISO8601 format and mixed formats
             if 'timestamp' in df.columns:
-                df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+                df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='ISO8601', errors='coerce')
             if 'datetime' in df.columns:
-                df['datetime'] = pd.to_datetime(df['datetime'], utc=True)
+                df['datetime'] = pd.to_datetime(df['datetime'], utc=True, format='ISO8601', errors='coerce')
             
             return df
         except Exception as e:

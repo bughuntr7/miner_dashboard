@@ -11,6 +11,14 @@ export function useMinerStats(minerName: string) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Don't fetch if minerName is empty
+    if (!minerName) {
+      setIsLoading(false)
+      setData(null)
+      setError(null)
+      return
+    }
+
     const fetchStats = async () => {
       try {
         setIsLoading(true)

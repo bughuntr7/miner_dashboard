@@ -26,6 +26,13 @@ export default function IncentiveChart({ minerName, limit = 50 }: IncentiveChart
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Don't fetch if minerName is empty
+    if (!minerName) {
+      setIsLoading(false)
+      setData([])
+      return
+    }
+
     const fetchIncentives = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/miners/${minerName}/incentives?limit=${limit}`)
