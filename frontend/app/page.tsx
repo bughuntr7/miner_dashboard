@@ -10,7 +10,7 @@ import { useMinerStats } from '@/hooks/useMinerStats'
 export default function Home() {
   const [selectedMiner, setSelectedMiner] = useState<string>('')
   const [dataLimit, setDataLimit] = useState<number>(120)
-  const [incentiveLimit, setIncentiveLimit] = useState<number>(50)
+  const [incentiveLimit, setIncentiveLimit] = useState<number>(120)
   const [trustLimit, setTrustLimit] = useState<number>(50)
   const [startTime, setStartTime] = useState<string | null>(null)
   const [endTime, setEndTime] = useState<string | null>(null)
@@ -21,9 +21,30 @@ export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0)
   const { isLoading } = useMinerStats(selectedMiner || '')
   
-  const limitOptions = [48, 72, 96, 120, 144, 168, 192, 216, 240, 480, 720]
-  const incentiveLimitOptions = [25, 50, 100, 200, 300, 500]
+  const limitOptions = [24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, 180, 192, 204, 216, 228, 240, 288, 360, 432, 480, 576, 600, 720, 864, 960, 1080, 1200, 1440, 1680, 1800, 2160, 2400]
+  const incentiveLimitOptions = [24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, 180, 192, 204, 216, 228, 240, 288, 360, 432, 480, 576, 600, 720, 864, 960, 1080, 1200, 1440, 1680, 1800, 2160, 2400]
   const trustLimitOptions = [25, 50, 100, 200, 300, 500]
+  
+  // Helper function to format data points with hours (12 data points = 1 hour)
+  const formatDataPointsLabel = (dataPoints: number): string => {
+    const hours = dataPoints / 12
+    if (hours === 1) {
+      return `${dataPoints} (1 hour)`
+    } else if (hours < 24) {
+      return `${dataPoints} (${hours} hours)`
+    } else {
+      const days = hours / 24
+      if (days === 1) {
+        return `${dataPoints} (1 day)`
+      } else if (days < 10) {
+        // Show one decimal place for days between 1 and 10
+        return `${dataPoints} (${days.toFixed(1)} days)`
+      } else {
+        // Round to nearest integer for larger values
+        return `${dataPoints} (${Math.round(days)} days)`
+      }
+    }
+  }
   
   // Helper functions for separate date and time inputs (UTC)
   const formatDate = (isoString: string | null): string => {
@@ -161,7 +182,7 @@ export default function Home() {
                   >
                     {limitOptions.map((option) => (
                       <option key={option} value={option}>
-                        {option}
+                        {formatDataPointsLabel(option)}
                       </option>
                     ))}
                   </select>
@@ -285,7 +306,7 @@ export default function Home() {
                 >
                   {incentiveLimitOptions.map((option) => (
                     <option key={option} value={option}>
-                      {option}
+                      {formatDataPointsLabel(option)}
                     </option>
                   ))}
                 </select>
